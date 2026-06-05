@@ -1,45 +1,69 @@
 package main
 
 import (
+	"github.com/stretchr/testify/assert"
 	"reflect"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
 // go test -v homework_test.go
 
 type CircularQueue struct {
 	values []int
-	// need to implement
+	size   int
+	index  int // index указывает на текущее положение (курсор) в очереди
 }
 
 func NewCircularQueue(size int) CircularQueue {
-	return CircularQueue{} // need to implement
+	cq := CircularQueue{
+		make([]int, size),
+		0,
+		0,
+	}
+	return cq
 }
 
 func (q *CircularQueue) Push(value int) bool {
-	return false // need to implement
+	if q.Full() {
+		return false
+	}
+
+	q.values[q.index] = value
+	q.index = (q.index + 1) % (len(q.values))
+	q.size += 1
+	return true
 }
 
 func (q *CircularQueue) Pop() bool {
-	return false // need to implement
+	if q.Empty() {
+		return false
+	}
+	q.values[0] = 0
+	q.index = 0
+	q.size -= 1
+	return true
 }
 
 func (q *CircularQueue) Front() int {
-	return -1 // need to implement
+	if q.Empty() {
+		return -1
+	}
+	return q.values[q.index]
 }
 
 func (q *CircularQueue) Back() int {
-	return -1 // need to implement
+	if q.Empty() {
+		return -1
+	}
+	return q.values[(q.index+len(q.values)-1)%(len(q.values))]
 }
 
 func (q *CircularQueue) Empty() bool {
-	return false // need to implement
+	return q.size == 0
 }
 
 func (q *CircularQueue) Full() bool {
-	return false // need to implement
+	return q.size == len(q.values)
 }
 
 func TestCircularQueue(t *testing.T) {
@@ -83,4 +107,77 @@ func TestCircularQueue(t *testing.T) {
 
 	assert.True(t, queue.Empty())
 	assert.False(t, queue.Full())
+
+	// Тесты с другими длинами очереди
+
+	// длина = 1
+	oneQueue := NewCircularQueue(1)
+
+	assert.True(t, oneQueue.Empty())
+	assert.False(t, oneQueue.Full())
+
+	assert.Equal(t, -1, oneQueue.Front())
+	assert.Equal(t, -1, oneQueue.Back())
+	assert.False(t, oneQueue.Pop())
+
+	assert.True(t, oneQueue.Push(1))
+	assert.False(t, oneQueue.Push(5))
+
+	assert.True(t, reflect.DeepEqual([]int{1}, oneQueue.values))
+
+	assert.False(t, oneQueue.Empty())
+	assert.True(t, oneQueue.Full())
+
+	assert.Equal(t, 1, oneQueue.Front())
+	assert.Equal(t, 1, oneQueue.Back())
+
+	assert.True(t, oneQueue.Pop())
+	assert.True(t, oneQueue.Empty())
+	assert.False(t, oneQueue.Full())
+	assert.True(t, oneQueue.Push(4))
+
+	assert.True(t, oneQueue.Pop())
+	assert.False(t, oneQueue.Pop())
+
+	assert.True(t, oneQueue.Empty())
+	assert.False(t, oneQueue.Full())
+
+	// длина = 4
+	fourQueue := NewCircularQueue(4)
+
+	assert.True(t, fourQueue.Empty())
+	assert.False(t, fourQueue.Full())
+
+	assert.Equal(t, -1, fourQueue.Front())
+	assert.Equal(t, -1, fourQueue.Back())
+	assert.False(t, fourQueue.Pop())
+
+	assert.True(t, fourQueue.Push(5))
+	assert.True(t, fourQueue.Push(10))
+	assert.True(t, fourQueue.Push(15))
+	assert.True(t, fourQueue.Push(20))
+	assert.False(t, fourQueue.Push(9))
+
+	assert.True(t, reflect.DeepEqual([]int{5, 10, 15, 20}, fourQueue.values))
+
+	assert.False(t, fourQueue.Empty())
+	assert.True(t, fourQueue.Full())
+
+	assert.Equal(t, 5, fourQueue.Front())
+	assert.Equal(t, 20, fourQueue.Back())
+
+	assert.True(t, fourQueue.Pop())
+	assert.True(t, fourQueue.Pop())
+	assert.True(t, fourQueue.Pop())
+	assert.True(t, fourQueue.Pop())
+	assert.True(t, fourQueue.Empty())
+	assert.False(t, fourQueue.Full())
+	assert.True(t, fourQueue.Push(9))
+
+	assert.True(t, fourQueue.Pop())
+	assert.False(t, fourQueue.Pop())
+
+	assert.True(t, fourQueue.Empty())
+	assert.False(t, fourQueue.Full())
+
 }
